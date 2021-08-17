@@ -13,6 +13,10 @@ from nba_api.stats.library.parameters import Season
 from nba_api.stats.library.parameters import SeasonTypeAllStar
 from nba_api.stats.library.parameters import SeasonType
 
+
+from nba_api.stats.endpoints import playergamelogs
+from nba_api.stats.endpoints import teamgamelog
+
 # Import Team list
 from nba_api.stats.static import teams
 nba_teams = teams.get_teams()
@@ -27,8 +31,7 @@ team_result_df = pd.DataFrame.from_dict(nba_teams_dict, orient='index').loc[[nba
 st.dataframe(team_result_df)
 
 
-# Display TeamGameLog
-from nba_api.stats.endpoints import teamgamelog
+
 teamgamelog_params = {'season':Season.default,
                      'season_type_all_star':SeasonTypeAllStar.default,
                      'team_id':team_result_df.id}
@@ -55,8 +58,6 @@ col2.write(fig)
 
 
 
-# PlayerGameLogs
-from nba_api.stats.endpoints import playergamelogs
 
 playergamelogs_params =      {'season_nullable':Season.default,
                              'season_type_nullable':SeasonTypeAllStar.default,
