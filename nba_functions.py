@@ -98,8 +98,8 @@ class SeasonGameLog:
     def merge_gamelog(self, gamelog):
 
         opponents_columns = ['Team_ID','Game_ID','FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
-       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF',
-       'PTS']
+       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
+
         opp_gamelog = gamelog[opponents_columns].rename(columns={'Team_ID':'Team_ID_OPP'})
 
         return gamelog.merge(opp_gamelog, left_on=['Game_ID', 'Team_ID_OPP'], right_on=['Game_ID', 'Team_ID_OPP'], how='left', suffixes=('','_OPP'))
@@ -108,7 +108,7 @@ class SeasonGameLog:
         # calculates difference between team and opps stats
 
         diff_columns = ['FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
-       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF']
+       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
         
         for col in diff_columns:
             gamelog[col + "_diff"] = gamelog[col] - gamelog[col+"_OPP"]
