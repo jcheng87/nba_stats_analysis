@@ -19,7 +19,6 @@ from nba_api.stats.endpoints import teamgamelogs
 from nba_api.stats.endpoints import playergamelogs
 
 
-
 class Team:
     def __init__(self):
         self.list = Team.dataframe()
