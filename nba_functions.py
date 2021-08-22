@@ -85,32 +85,52 @@ class SeasonGameLog:
 
         gamelog['GAME_DATE'] = pd.to_datetime(gamelog['GAME_DATE'])
 
+        # Get teams abbr
         gamelog['TEAM'] = gamelog['MATCHUP'].str[:3]
         gamelog['OPP'] = gamelog['MATCHUP'].str[-3:]
         gamelog['Team_ID_OPP'] = gamelog['OPP'].map(lambda x: team_list.search_teaminfo(x).iloc[0]['id'])
+        
+        # W/L Boolean
+        gamelog['win?'] =  np.where(gamelog['WL'] == 'W',1,0)
 
-
+        # convert to categories
+        gamelog['win?'] = gamelog['win?'].astype('category')
+        gamelog['WL'] = gamelog['WL'].astype('category')
+        gamelog['TEAM'] = gamelog['MATCHUP'].str[:3].astype('category')
+        gamelog['OPP'] = gamelog['MATCHUP'].str[-3:].astype('category')
 
         return gamelog
 
 
     def merge_gamelog(self, gamelog):
 
-        opponents_columns = ['Team_ID','Game_ID','FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
-       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
+        opponents_columns = ['Team_ID','Game_ID','FGM', 'FGA', 'FG_PCT', 'FG3M', 
+                            'FG3A', 'FG3_PCT', 'FTM', 'FTA', 'FT_PCT', 'OREB', 'DREB', 
+                            'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
 
         opp_gamelog = gamelog[opponents_columns].rename(columns={'Team_ID':'Team_ID_OPP'})
 
-        return gamelog.merge(opp_gamelog, left_on=['Game_ID', 'Team_ID_OPP'], right_on=['Game_ID', 'Team_ID_OPP'], how='left', suffixes=('','_OPP'))
+        gamelog = gamelog.merge(opp_gamelog, left_on=['Game_ID', 'Team_ID_OPP'], right_on=['Game_ID', 'Team_ID_OPP'], how='left', suffixes=('','_OPP'))
+
+        # calculate % rebounds for OFF and DEF
+        gamelog['OREB%'] = (gamelog['OREB'] / (gamelog['OREB'] + gamelog['DREB_OPP'])).round(2)
+        gamelog['DREB%_OPP'] = 1 - gamelog['OREB%']
+
+        gamelog['DREB%'] = (gamelog['DREB'] / (gamelog['DREB'] + gamelog['OREB_OPP'])).round(2)
+        gamelog['OREB%_OPP'] = 1 - gamelog['DREB%']
+
+        return gamelog
     
     def add_stat_diff(self, gamelog):
         # calculates difference between team and opps stats
 
         diff_columns = ['FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
-       'FT_PCT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
+       'FT_PCT', 'OREB', 'DREB', 'OREB%', 'DREB%', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
         
         for col in diff_columns:
             gamelog[col + "_diff"] = gamelog[col] - gamelog[col+"_OPP"]
+        
+        
         
         return gamelog
 
